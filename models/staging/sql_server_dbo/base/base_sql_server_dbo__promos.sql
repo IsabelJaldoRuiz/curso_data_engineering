@@ -1,17 +1,16 @@
 WITH src_promos AS (
     SELECT * 
     FROM {{ source('sql_server_dbo', 'promos') }}
-    )
-        
+    
     UNION ALL
     
     SELECT 
-        "non-promo" AS promo_id
+        'non-promo' AS promo_id
         , 0 AS discount
-        , "inactive" AS status
+        , 'inactive' AS status
         , NULL AS _fivetran_deleted
         , SYSDATE() AS _fivetran_synced
-    ,
+    ),
 
 
 renamed_casted AS (
