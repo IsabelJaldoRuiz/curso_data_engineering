@@ -29,7 +29,7 @@ models:
         data_type: VARCHAR
         constraints:
           - type: not_null
-          - type: foreing_key
+          # - type: foreing_key
         description: >
           Hash for each unique product.
 

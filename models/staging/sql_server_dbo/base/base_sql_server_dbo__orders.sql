@@ -6,21 +6,21 @@ WITH src_orders AS (
 renamed_casted AS (
     SELECT
         {{ dbt_utils.generate_surrogate_key(['order_id']) }} AS order_id 
-        , order_id AS old_order_id
-        , shipping_service
-        , shipping_cost
-        , address_id
-        , created_at
+        -- , order_id AS old_order_id
+        , CAST( shipping_service AS VARCHAR ) AS shipping_service
+        , CAST( shipping_cost AS FLOAT ) AS shipping_cost
+        , CAST( {{ dbt_utils.generate_surrogate_key(['address_id']) }} AS VARCHAR ) AS address_id
+        , CONVERT_TIMEZONE('UTC', CAST( created_at AS TIMESTAMP_TZ )) AS created_at 
         , promo_id
-        , estimated_delivery_at
-        , order_cost
-        , user_id
-        , order_total
-        , delivered_at
-        , tracking_id
-        , status
-        , _fivetran_deleted AS is_deleted
-        , CONVERT_TIMEZONE('UTC', _fivetran_synced::TIMESTAMP_TZ(9)) AS date_load
+        , CONVERT_TIMEZONE('UTC', CAST( estimated_delivery_at AS TIMESTAMP_TZ )) AS estimated_delivery_at
+        , CAST( order_cost AS FLOAT) AS order_cost
+        , CAST( {{ dbt_utils.generate_surrogate_key(['user_id']) }} AS VARCHAR ) AS user_id
+        , CAST( order_total AS FLOAT ) AS order_total
+        , CONVERT_TIMEZONE('UTC', CAST(delivered_at AS TIMESTAMP_TZ)) AS delivered_at
+        , CAST( {{ dbt_utils.generate_surrogate_key(['tracking_id']) }} AS VARCHAR ) AS tracking_id
+        , CAST( status AS VARCHAR ) AS status
+        , CAST( IFNULL (_fivetran_deleted, FALSE) AS BOOLEAN ) AS is_deleted
+        , CONVERT_TIMEZONE('UTC', CAST(_fivetran_synced AS TIMESTAMP_TZ)) AS date_load
     FROM src_orders
     )
 

@@ -5,7 +5,7 @@ WITH src_users AS (
 
 renamed_casted AS (
     SELECT
-        {{ dbt.hash('user_id') }} AS user_id 
+        {{ dbt_utils.generate_surrogate_key(['user_id']) }} AS user_id 
         , user_id AS old_user_id
         , updated_at
         , address_id

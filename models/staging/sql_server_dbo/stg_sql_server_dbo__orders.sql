@@ -23,7 +23,7 @@ renamed_casted AS (
         , shipping_service
         , estimated_delivery_at_utc
         , delivered_at_utc
-				,	DATEDIFF(day, created_at_utc, delivered_at_utc) AS days_to_deliver
+		,DATEDIFF(day, created_at_utc, delivered_at_utc) AS days_to_deliver
         , status_order
         , date_load
     FROM stg_orders

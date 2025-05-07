@@ -5,12 +5,12 @@ WITH src_order_items AS (
 
 renamed_casted AS (
     SELECT
-        {{ dbt_utils.generate_surrogate_key(['order_id', 'product_id']) }} AS order_item_id  
-        , order_id
-        , product_id
-        , quantity
-        , _fivetran_deleted AS is_deleted
-        , CONVERT_TIMEZONE('UTC', _fivetran_synced::TIMESTAMP_TZ(9)) AS date_load
+        CAST( {{ dbt_utils.generate_surrogate_key(['order_id', 'product_id']) }} AS VARCHAR ) AS order_item_id  
+        , CAST( {{ dbt_utils.generate_surrogate_key(['order_id']) }} AS VARCHAR ) AS order_id
+        , CAST( {{ dbt_utils.generate_surrogate_key(['product_id']) }} AS VARCHAR ) AS product_id
+        , CAST( quantity AS NUMBER ) AS quantity
+        , CAST( IFNULL (_fivetran_deleted, FALSE) AS BOOLEAN ) AS is_deleted
+        , CONVERT_TIMEZONE('UTC', CAST(_fivetran_synced AS TIMESTAMP_TZ)) AS date_load
     FROM src_order_items
     )
 
