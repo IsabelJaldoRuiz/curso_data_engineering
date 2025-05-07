@@ -5,7 +5,7 @@ WITH src_orders AS (
 
 renamed_casted AS (
     SELECT
-        {{ dbt.hash('order_id') }} AS order_id 
+        {{ dbt_utils.generate_surrogate_key(['order_id']) }} AS order_id 
         , order_id AS old_order_id
         , shipping_service
         , shipping_cost

@@ -5,14 +5,14 @@ WITH src_addresses AS (
 
 renamed_casted AS (
     SELECT
-        {{ dbt.hash('address_id') }} AS address_id 
-        , address_id AS old_address_id
-        , address
-        , country
-        , state
-        , zipcode
-        , _fivetran_deleted AS is_deleted
-        , CONVERT_TIMEZONE('UTC', _fivetran_synced::TIMESTAMP_TZ(9)) AS date_load
+        CAST( {{ dbt_utils.generate_surrogate_key(['address_id']) }} AS VARCHAR) AS address_id 
+        -- , CAST( address_id AS VARCHAR ) AS old_address_id
+        , CAST( address AS VARCHAR ) AS address
+        , CAST( country AS VARCHAR ) AS country
+        , CAST( state AS VARCHAR ) AS state
+        , CAST( zipcode AS NUMBER ) AS zipcode
+        , CAST( IFNULL (_fivetran_deleted, FALSE) AS BOOLEAN ) AS is_deleted
+        , CONVERT_TIMEZONE('UTC', CAST(_fivetran_synced AS TIMESTAMP_TZ)) AS date_load
     FROM src_addresses
     )
 

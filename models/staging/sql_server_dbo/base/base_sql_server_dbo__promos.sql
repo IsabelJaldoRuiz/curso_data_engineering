@@ -15,7 +15,7 @@ WITH src_promos AS (
 
 renamed_casted AS (
     SELECT
-        {{ dbt.hash('promo_id') }} AS promo_id 
+        {{ dbt_utils.generate_surrogate_key(['promo_id']) }} AS promo_id 
         , promo_id AS promo_desc
         , discount
         , status

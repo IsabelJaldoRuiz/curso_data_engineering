@@ -5,12 +5,12 @@ WITH src_budget AS (
 
 renamed_casted AS (
     SELECT
-        {{ dbt_utils.generate_surrogate_key(['product_id', 'month']) }} AS budget_id 
+        CAST( {{ dbt_utils.generate_surrogate_key(['product_id', 'month']) }} AS VARCHAR ) AS budget_id 
         -- , _row
-        , product_id
-        , month
-        , quantity
-        , CONVERT_TIMEZONE('UTC', _fivetran_synced::TIMESTAMP_TZ(9)) AS date_load
+        -- , CAST(product_id AS VARCHAR) AS old_product_id
+        , CAST(month AS DATE) AS month
+        , CAST(quantity AS NUMBER) AS quantity
+        , CONVERT_TIMEZONE('UTC', CAST(_fivetran_synced AS TIMESTAMP_TZ)) AS date_load
     FROM src_budget
     )
 

@@ -5,7 +5,8 @@ WITH src_products AS (
 
 renamed_casted AS (
     SELECT
-        {{ dbt.hash('product_id') }} AS product_id 
+        {{ dbt_utils.generate_surrogate_key(['product_id']) }} AS product_id
+        , product_id AS old_product_id 
         , price
         , name
         , inventory
