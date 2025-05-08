@@ -1,0 +1,156 @@
+version: 2
+
+models:
+  - name: addresses
+    config:
+      contract:
+        enforced: true
+    description: >
+      Data about all address.
+
+    columns:
+
+      - name: address_id
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+          - type: unique
+          - type: primary_key
+        description: >
+          Hash for each unique address.
+
+      # - name: old_address_id
+      #   data_type: VARCHAR
+      #   constraints:
+      #     - type: not_null
+      #   description: >
+      #     UUID for each unique address on platform.
+
+      - name: zipcode
+        data_type: NUMBER
+        constraints:
+          - type: not_null
+        description: >
+          Address zipcode.
+
+      - name: country
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          Country of the address.
+
+      - name: state
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          State of the address.
+
+      - name: is_deleted
+        data_type: BOOLEAN
+        constraints:
+          - type: not_null
+        description: >
+          Boolean indicating whether it is a deleted record or not.
+      
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        constraints:
+          - type: not_null
+        description: >
+          Date that the data was loaded.
+
+
+  # - name: events
+  #   config:
+  #     contract:
+  #       enforced: true
+  #   description: >
+  #     Data about all events.
+
+  #   columns:
+
+  #     - name: event_id
+  #       data_type: VARCHAR
+  #       constraints:
+  #         - type: not_null
+  #         - type: unique
+  #         - type: primary_key
+  #       description: >
+  #         Hash for each unique event.
+
+  #     # - name: old_event_id
+  #     #   data_type: VARCHAR
+  #     #   constraints:
+  #     #     - type: not_null
+  #     #   description: >
+  #     #     UUID for each unique event on platform.
+
+  #     - name: page_url
+  #       data_type: VARCHAR
+  #       constraints:
+  #         - type: not_null
+  #       description: >
+  #         Event URL page.
+
+  #     - name: event_type
+  #       data_type: VARCHAR
+  #       constraints:
+  #         - type: not_null
+  #       description: >
+  #         Type of event held.
+
+  #     - name: user_id
+  #       data_type: VARCHAR
+  #       constraints:
+  #         - type: not_null
+  #         # - type: foreign_key
+  #       description: >
+  #         Hash for each unique user.
+
+
+  #     - name: product_id
+  #       data_type: VARCHAR
+  #       # constraints:
+  #         # - type: not_null
+  #         # - type: foreing_key
+  #       description: >
+  #         Hash for each unique product.
+
+  #     - name: session_id
+  #       data_type: VARCHAR
+  #       constraints:
+  #         - type: not_null
+  #       description: >
+  #         Hash for each session.
+
+  #     - name: created_at
+  #       data_type: TIMESTAMP_NTZ
+  #       constraints:
+  #         - type: not_null
+  #       description: >
+  #         Date that the data was created.
+
+  #     - name: order_id
+  #       data_type: VARCHAR
+  #       # constraints:
+  #       #   - type: not_null
+  #       #   - type: foreing_key
+  #       description: >
+  #         Hash for each unique product.
+
+  #     - name: is_deleted
+  #       data_type: BOOLEAN
+  #       constraints:
+  #         - type: not_null
+  #       description: >
+  #         Boolean indicating whether it is a deleted record or not.
+      
+  #     - name: date_load
+  #       data_type: TIMESTAMP_TZ
+  #       constraints:
+  #         - type: not_null
+  #       description: >
+  #         Date that the data was loaded.
+

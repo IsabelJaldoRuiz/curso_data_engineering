@@ -4,16 +4,16 @@ sources:
 
   - name: sql_server_dbo # name of the source 
     schema: sql_server_dbo # this is the schema our raw data lives in
-    database: ALUMNO8_DEV_BRONZE_DB # this is the name of our database
+    database: "{{ env_var('DBT_ENVIRONMENTS') }}_BRONZE_DB" # this is the name of our database
 
     quoting:
       database: false
       schema: false
       identifier: false
 
-    # freshness:
-    #   warn_after: {count: 24, period: hour}
-    #   error_after: {count: 48, period: hour}
+    freshness:
+      warn_after: {count: 24, period: hour}
+      error_after: {count: 1000, period: day}
 
     tables:
 
