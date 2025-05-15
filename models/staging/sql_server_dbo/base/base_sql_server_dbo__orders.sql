@@ -5,13 +5,16 @@ WITH src_orders AS (
 
 renamed_casted AS (
     SELECT
-        {{ dbt_utils.generate_surrogate_key(['order_id']) }} AS order_id 
+        CAST( {{ dbt_utils.generate_surrogate_key(['order_id']) }} AS VARCHAR) AS order_id 
         -- , order_id AS old_order_id
         , CAST( shipping_service AS VARCHAR ) AS shipping_service
         , CAST( shipping_cost AS FLOAT ) AS shipping_cost
         , CAST( {{ dbt_utils.generate_surrogate_key(['address_id']) }} AS VARCHAR ) AS address_id
         , CONVERT_TIMEZONE('UTC', CAST( created_at AS TIMESTAMP_TZ )) AS created_at 
-        , promo_id
+        , CASE promo_id
+            WHEN '' THEN {{ dbt_utils.generate_surrogate_key(["'non-promo'"]) }}
+            ELSE {{ dbt_utils.generate_surrogate_key(['promo_id']) }}
+        END AS promo_id
         , CONVERT_TIMEZONE('UTC', CAST( estimated_delivery_at AS TIMESTAMP_TZ )) AS estimated_delivery_at
         , CAST( order_cost AS FLOAT) AS order_cost
         , CAST( {{ dbt_utils.generate_surrogate_key(['user_id']) }} AS VARCHAR ) AS user_id

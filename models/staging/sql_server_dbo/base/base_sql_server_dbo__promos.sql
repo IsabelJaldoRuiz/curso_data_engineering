@@ -9,18 +9,18 @@ WITH src_promos AS (
         , 0 AS discount
         , 'inactive' AS status
         , NULL AS _fivetran_deleted
-        , SYSDATE() AS _fivetran_synced
+        , CAST('9999-12-31 23:59:59' AS TIMESTAMP_TZ) AS _fivetran_synced
     ),
 
 
 renamed_casted AS (
     SELECT
-        {{ dbt_utils.generate_surrogate_key(['promo_id']) }} AS promo_id 
-        , promo_id AS promo_desc
-        , discount
-        , status
-        , _fivetran_deleted AS is_deleted
-        , CONVERT_TIMEZONE('UTC', _fivetran_synced::TIMESTAMP_TZ(9)) AS date_load
+        CAST( {{ dbt_utils.generate_surrogate_key(['promo_id']) }} AS VARCHAR ) AS promo_id 
+        , CAST( promo_id AS VARCHAR ) AS promo_desc
+        , CAST( discount AS NUMBER ) AS discount
+        , CAST( status AS VARCHAR ) AS status
+        , CAST( IFNULL (_fivetran_deleted, FALSE) AS BOOLEAN ) AS is_deleted
+        , CONVERT_TIMEZONE('UTC', CAST(_fivetran_synced AS TIMESTAMP_TZ)) AS date_load
     FROM src_promos
     )
 
