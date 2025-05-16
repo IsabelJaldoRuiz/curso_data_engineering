@@ -12,20 +12,20 @@ WITH stg_orders AS (
 renamed_casted AS (
     SELECT
         order_id 
-        , user_id 
-        , promo_id
+        , {{ dbt_utils.generate_surrogate_key(['shipping_service']) }} AS shipping_service_id 
+        , shipping_cost
         , address_id
-        , created_at_utc
-        , item_order_cost_usd
-        , shipping_cost_usd
-        , total_order_cost_usd
+        , created_at 
+        , promo_id
+        , estimated_delivery_at
+        , order_cost
+        , user_id
+        , order_total
+        , delivered_at
         , tracking_id
-        , shipping_service
-        , estimated_delivery_at_utc
-        , delivered_at_utc
-	    , DATEDIFF(day, created_at_utc, delivered_at_utc) AS days_to_deliver
-        , status_order
-        , date_load
+        , status
+        , is_deleted
+        , date_load 
     FROM stg_orders
     )
 

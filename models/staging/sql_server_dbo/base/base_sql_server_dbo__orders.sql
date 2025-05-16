@@ -7,7 +7,10 @@ renamed_casted AS (
     SELECT
         CAST( {{ dbt_utils.generate_surrogate_key(['order_id']) }} AS VARCHAR) AS order_id 
         -- , order_id AS old_order_id
-        , CAST( shipping_service AS VARCHAR ) AS shipping_service
+        , CAST ( CASE shipping_service
+            WHEN '' THEN 'non-service'
+            ELSE shipping_service
+        END AS VARCHAR) AS shipping_service
         , CAST( shipping_cost AS FLOAT ) AS shipping_cost
         , CAST( {{ dbt_utils.generate_surrogate_key(['address_id']) }} AS VARCHAR ) AS address_id
         , CONVERT_TIMEZONE('UTC', CAST( created_at AS TIMESTAMP_TZ )) AS created_at 
