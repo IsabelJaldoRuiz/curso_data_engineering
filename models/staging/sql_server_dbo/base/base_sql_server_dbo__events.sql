@@ -14,8 +14,7 @@ renamed_casted AS (
         , CAST( {{ dbt_utils.generate_surrogate_key(['session_id']) }} AS VARCHAR ) AS session_id
         , CONVERT_TIMEZONE('UTC', CAST(created_at AS TIMESTAMP_NTZ)) AS created_at
         , CAST( {{ dbt_utils.generate_surrogate_key(['order_id']) }} AS VARCHAR ) AS order_id
-        , CAST( IFNULL (_fivetran_deleted, FALSE) AS BOOLEAN ) AS is_deleted
-        , CONVERT_TIMEZONE('UTC', CAST(_fivetran_synced AS TIMESTAMP_TZ)) AS date_load
+        , {{ add_fivetran_metadata(_fivetran_deleted, _fivetran_synced) }} 
     FROM src_events
     )
 

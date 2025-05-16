@@ -1,5 +1,4 @@
-{% macro get_fivetran_fiels(_fivetran_deleted, _fivetran_synced) %}
-    {% set is_deleted = CAST( IFNULL (_fivetran_deleted, FALSE) AS BOOLEAN ) %}
-    {% set date_load = CONVERT_TIMEZONE('UTC', CAST(_fivetran_synced AS TIMESTAMP_TZ)) %}
-    {{ return(is_deleted, date_load) }}
+{% macro add_fivetran_metadata(_fivetran_deleted, _fivetran_synced) %}
+    CAST( IFNULL (_fivetran_deleted, FALSE) AS BOOLEAN ) AS is_deleted
+    , CONVERT_TIMEZONE('UTC', CAST(_fivetran_synced AS TIMESTAMP_TZ)) AS date_load
 {% endmacro %}

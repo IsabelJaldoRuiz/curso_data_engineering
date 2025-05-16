@@ -6,7 +6,7 @@
 
 WITH stg_orders AS (
     SELECT * 
-    FROM {{ source('sql_server_dbo', 'orders') }}
+    FROM  {{ ref('base_sql_server_dbo__orders') }}
 ),
 
 renamed_casted AS (
@@ -23,7 +23,7 @@ renamed_casted AS (
         , shipping_service
         , estimated_delivery_at_utc
         , delivered_at_utc
-		,DATEDIFF(day, created_at_utc, delivered_at_utc) AS days_to_deliver
+	    , DATEDIFF(day, created_at_utc, delivered_at_utc) AS days_to_deliver
         , status_order
         , date_load
     FROM stg_orders

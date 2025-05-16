@@ -19,8 +19,7 @@ renamed_casted AS (
         , CAST( promo_id AS VARCHAR ) AS promo_desc
         , CAST( discount AS NUMBER ) AS discount
         , CAST( status AS VARCHAR ) AS status
-        , CAST( IFNULL (_fivetran_deleted, FALSE) AS BOOLEAN ) AS is_deleted
-        , CONVERT_TIMEZONE('UTC', CAST(_fivetran_synced AS TIMESTAMP_TZ)) AS date_load
+        , {{ add_fivetran_metadata(_fivetran_deleted, _fivetran_synced) }} 
     FROM src_promos
     )
 

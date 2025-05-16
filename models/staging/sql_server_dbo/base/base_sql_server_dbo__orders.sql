@@ -22,8 +22,7 @@ renamed_casted AS (
         , CONVERT_TIMEZONE('UTC', CAST(delivered_at AS TIMESTAMP_TZ)) AS delivered_at
         , CAST( {{ dbt_utils.generate_surrogate_key(['tracking_id']) }} AS VARCHAR ) AS tracking_id
         , CAST( status AS VARCHAR ) AS status
-        , CAST( IFNULL (_fivetran_deleted, FALSE) AS BOOLEAN ) AS is_deleted
-        , CONVERT_TIMEZONE('UTC', CAST(_fivetran_synced AS TIMESTAMP_TZ)) AS date_load
+        , {{ add_fivetran_metadata(_fivetran_deleted, _fivetran_synced) }} 
     FROM src_orders
     )
 

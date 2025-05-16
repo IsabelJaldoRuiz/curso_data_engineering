@@ -1,4 +1,3 @@
-
 {{
   config(
     materialized='view'
@@ -12,10 +11,10 @@ WITH src_budget AS (
 
 renamed_casted AS (
     SELECT
-          product_id
+        budget_id
         , quantity
         , month
-        , _fivetran_synced AS date_load
+        , date_load
     FROM src_budget
     )
 

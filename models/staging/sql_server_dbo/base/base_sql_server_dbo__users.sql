@@ -7,14 +7,14 @@ renamed_casted AS (
     SELECT
         CAST( {{ dbt_utils.generate_surrogate_key(['user_id']) }} AS VARCHAR ) AS user_id 
         --, user_id AS old_user_id
-        CONVERT_TIMEZONE(
+        , CONVERT_TIMEZONE(
             'UTC',
             CAST(IFNULL(
                     updated_at,
                     CAST('9999-12-31 23:59:59' AS TIMESTAMP_TZ)
                     ) AS TIMESTAMP_TZ
                 )
-            ) AS updated_at,
+            ) AS updated_at
         , CAST( {{ dbt_utils.generate_surrogate_key(['address_id']) }} AS VARCHAR ) AS address_id
         , CAST( first_name AS VARCHAR ) AS first_name
         , CAST( last_name AS VARCHAR ) AS last_name
@@ -22,7 +22,7 @@ renamed_casted AS (
         , CAST( phone_number AS VARCHAR ) AS phone_number
         -- , total_orders
         , CAST( email AS VARCHAR ) AS email
-        , {% get_fivetran_fiels(is_deleted, date_load) %} 
+        , {{ add_fivetran_metadata(_fivetran_deleted, _fivetran_synced) }} 
     FROM src_users
     )
 
