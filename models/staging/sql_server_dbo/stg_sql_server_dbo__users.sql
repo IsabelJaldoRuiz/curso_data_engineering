@@ -10,7 +10,15 @@ stg_users AS (
         , CAST( first_name AS VARCHAR ) AS first_name
         , CAST( last_name AS VARCHAR ) AS last_name
         , CAST( phone_number AS VARCHAR ) AS phone_number
+        , CASE 
+            WHEN REGEXP_LIKE(phone_number, '^[0-9]{3}-[0-9]{3}-[0-9]{4}$') THEN true
+            ELSE false
+            END AS is_phone_number_valid
         , CAST( email AS VARCHAR ) AS email
+        , CASE 
+            WHEN REGEXP_LIKE( email, '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$') THEN true
+            ELSE false
+            END AS is_email_valid
         , CAST( {{ dbt_utils.generate_surrogate_key(['address_id']) }} AS VARCHAR ) AS address_id
         , CONVERT_TIMEZONE('UTC', CAST( created_at AS TIMESTAMP_TZ )) AS created_at
         , CONVERT_TIMEZONE(

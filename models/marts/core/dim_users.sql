@@ -9,7 +9,9 @@ dim_users AS (
         , first_name
         , last_name
         , phone_number
+        , is_phone_number_valid
         , email
+        , is_email_valid
         , address_id
         , created_at
         , updated_at

@@ -14,9 +14,10 @@ renamed_casted AS (
         -- , CAST( PRONOUNS AS VARCHAR ) AS pronouns
         -- , CAST( AGE AS NUMBER ) AS age
         -- , CAST( BIRTH_DATE AS DATE ) AS birth_date
-        -- , CAST( JOB_TITLE AS VARCHAR ) AS job_title
-        -- , CAST( DEPARTMENT AS VARCHAR ) AS department
-        -- , CAST( BUSINESS_UNIT AS VARCHAR ) AS businnes_unit
+        -- , CAST( {{ dbt_utils.generate_surrogate_key(['JOB_TITLE']) }} AS VARCHAR ) AS job_possition_id
+        , CAST( JOB_TITLE AS VARCHAR ) AS job_title
+        , CAST( DEPARTMENT AS VARCHAR ) AS department
+        , CAST( BUSINESS_UNIT AS VARCHAR ) AS businness_unit
         , CAST( JOB_LEVEL AS NUMBER ) AS job_level
         -- , CAST( 
         --     CASE CHARINDEX(',', LOCATION)

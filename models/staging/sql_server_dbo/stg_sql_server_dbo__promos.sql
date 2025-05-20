@@ -11,7 +11,7 @@ WITH src_promos AS (
     UNION ALL
     
     SELECT 
-        'non-promo' AS promo_id
+        'non promo' AS promo_id
         , 0 AS discount
         , 'inactive' AS status
         , NULL AS _fivetran_deleted
@@ -21,7 +21,7 @@ WITH src_promos AS (
 stg_promos AS (
     SELECT
         CAST( {{ dbt_utils.generate_surrogate_key(['promo_id']) }} AS VARCHAR ) AS promo_id 
-        , CAST( promo_id AS VARCHAR ) AS promo_desc
+        , CAST( LOWER( REPLACE( promo_id, '-', ' ' ) ) AS VARCHAR ) AS promo_desc
         , CAST( discount AS NUMBER ) AS discount
         , CAST( status AS VARCHAR ) AS status
         , {{ add_fivetran_metadata(_fivetran_deleted, _fivetran_synced) }} 
