@@ -1,17 +1,26 @@
-WITH src_order_items AS (
-    SELECT * 
-    FROM {{ ref('base_sql_server_dbo__order_items') }}
+{{
+  config(
+    materialized='view'
+  )
+}}
+
+WITH bases_order_items_products AS (
+    SELECT order_items.*, products.price
+    FROM {{ ref('base_sql_server_dbo__order_items') }} AS order_items
+    INNER JOIN {{ ref('base_sql_server_dbo__products') }} AS products
+    ON order_items.product_id = products.product_id
     ),
 
-renamed_casted AS (
+stg_order_items AS (
     SELECT
         order_item_id  
         , order_id
         , product_id
         , quantity
+        , price
         , is_deleted
         , date_load 
-    FROM src_order_items
+    FROM bases_order_items_products
     )
 
-SELECT * FROM renamed_casted
+SELECT * FROM stg_order_items

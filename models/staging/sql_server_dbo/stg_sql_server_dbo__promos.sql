@@ -1,3 +1,9 @@
+{{
+  config(
+    materialized='view'
+  )
+}}
+
 WITH src_promos AS (
     SELECT * 
     FROM {{ source('sql_server_dbo', 'promos') }}
@@ -12,8 +18,7 @@ WITH src_promos AS (
         , CAST('9999-12-31 23:59:59' AS TIMESTAMP_TZ) AS _fivetran_synced
     ),
 
-
-renamed_casted AS (
+stg_promos AS (
     SELECT
         CAST( {{ dbt_utils.generate_surrogate_key(['promo_id']) }} AS VARCHAR ) AS promo_id 
         , CAST( promo_id AS VARCHAR ) AS promo_desc
@@ -23,5 +28,4 @@ renamed_casted AS (
     FROM src_promos
     )
 
-
-SELECT * FROM renamed_casted
+SELECT * FROM stg_promos

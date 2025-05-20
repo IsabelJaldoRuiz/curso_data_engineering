@@ -1,0 +1,129 @@
+version: 2
+
+sources:
+  - name: additional_data
+    description: >
+      Raw additional data for addresses and products.
+    schema: additional_data
+    database: "{{ env_var('DBT_ENVIRONMENTS') }}_BRONZE_DB"
+
+    quoting:
+      database: false
+      schema: false
+      identifier: false
+
+    freshness:
+      warn_after: { count: 24, period: hour }
+      error_after: { count: 1000, period: day }
+
+    tables:
+      - name: addresses_info
+        description: >
+          More data about addresses by the zipcode.
+        columns:
+
+          - name: zipcode
+            description: >
+              .
+            tests:
+              - unique
+              - not_null
+              - relationships:
+                  to: source('sql_server_dbo','products')
+                  field: product_id
+
+          - name: latitude
+            description: >
+              .
+            tests:
+              - not_null
+
+          - name: longitude
+            description: >
+              Number of units for each product and each month for products.
+            tests:
+              - not_null
+
+          - name: population
+            description: >
+              .
+            tests:
+              - not_null
+
+          - name: density
+            description: >
+              .
+            tests:
+              - not_null
+
+          - name: percentaje_male
+            description: >
+              .
+            tests:
+              - not_null
+
+          - name: percentaje_female
+            description: >
+              .
+            tests:
+              - not_null
+
+          - name: average_age
+            description: >
+              .
+            tests:
+              - not_null
+
+          - name: percentage_less_18_years
+            description: >
+              .
+            tests:
+              - not_null
+
+          - name: percentaje_18_64_years
+            description: >
+              .
+            tests:
+              - not_null
+
+          - name: percentage_65_more_years
+            description: >
+              .
+            tests:
+              - not_null
+
+      - name: products_info
+        description: >
+          More data about dimensions of products.
+        columns:
+
+          - name: name
+            description: >
+              .
+            tests:
+              - unique
+              - not_null
+
+          - name: weight_kg
+            description: >
+              .
+            tests:
+              - not_null
+
+          - name: height_cm
+            description: >
+              .
+            tests:
+              - not_null
+
+          - name: length_cm
+            description: >
+              .
+            tests:
+              - not_null
+
+          - name: width_cm
+            description: >
+              .
+            tests:
+              - not_null

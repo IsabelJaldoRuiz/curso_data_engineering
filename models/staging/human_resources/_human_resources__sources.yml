@@ -1,0 +1,36 @@
+version: 2
+
+sources:
+  - name: human_resources
+    description: >
+      Raw data from about human resources of the bussiness.
+    schema: human_resources
+    database: "{{ env_var('DBT_ENVIRONMENTS') }}_BRONZE_DB"
+
+    quoting:
+      database: false
+      schema: false
+      identifier: false
+
+    freshness:
+      warn_after: { count: 24, period: hour }
+      error_after: { count: 1000, period: day }
+
+    tables:
+      - name: employees
+        description: >
+          Data about employees.
+        # columns:
+
+        #   - name: zipcode
+        #     description: >
+        #       .
+        #     tests:
+        #       - unique
+        #       - not_null
+        #       - relationships:
+        #           to: source('sql_server_dbo','products')
+        #           field: product_id
+      - name: employees_snapshots
+        description: >
+          Data about employees.
