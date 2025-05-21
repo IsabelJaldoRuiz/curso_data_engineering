@@ -8,6 +8,8 @@ stg_hr AS (
         snapshot_id
         , employee_id
         , CAST( {{ dbt_utils.generate_surrogate_key(['job_title']) }} AS VARCHAR ) AS job_possition_id
+        , training_count
+        , last_training_date
         , promotion_count
         , last_promotion_date
         , shapshot_date

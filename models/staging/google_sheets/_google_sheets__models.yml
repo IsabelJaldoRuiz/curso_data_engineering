@@ -9,27 +9,21 @@ models:
       Data about all budgets by product and month.
 
     columns:
-      # - name: _row
-      #   tests:
-      #     - not_null
-      #   data_type: NUMBER
-      #   constraints:
-      #     - type: not_null
-      #   description: >
-      #     Number of each row from google sheet.
-
-      # - name: old_product_id
-      #   data_type: VARCHAR
-      #   constraints:
-      #     - type: not_null
-      #   description: >
-      #     UUID for each unique product on platform.
+      - name: product_id
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+          - type: primary_key
+        description: >
+          Hash for each unique budget, key surrogated by product_id and end of month date.
 
       - name: product_id
         data_type: VARCHAR
         constraints:
           - type: not_null
-          # - type: foreing_key
+          - type: foreign_key
+            to: ref('stg_sql_server_dbo__products')
+            to_columns: product_id
         description: >
           Hash for each unique product.
 

@@ -43,10 +43,10 @@ renamed_casted AS (
         , CAST( HIGH_POTENTIAL_FLAG AS BOOLEAN ) AS is_high_potential
         , CAST( SUCCESSION_PLAN_STATUS AS VARCHAR ) AS succession_plan_status
         , CAST( AIHR_CERTIFIED AS BOOLEAN ) AS is_aihr_certified
-        , CAST( TRAINING_COUNT AS NUMBER ) AS training_count
-        , CAST( LAST_TRAINING_DATE AS DATE ) AS last_training_date
-        --, CAST( PROMOTION_COUNT AS NUMBER ) AS promotion_count
-        --, CAST( LAST_PROMOTION_DATE AS DATE ) AS last_promotion_date
+        -- , CAST( TRAINING_COUNT AS NUMBER ) AS training_count
+        -- , CAST( LAST_TRAINING_DATE AS DATE ) AS last_training_date
+        -- , CAST( PROMOTION_COUNT AS NUMBER ) AS promotion_count
+        -- , CAST( LAST_PROMOTION_DATE AS DATE ) AS last_promotion_date
     FROM src_employees
     )
 

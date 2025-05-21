@@ -4,9 +4,19 @@
   )
 }}
 
-WITH bases_order_items_products AS (
+WITH bases_order_sale_items AS (
+    SELECT * 
+    FROM {{ ref('base_sql_server_dbo__order_items') }}
+    
+    UNION ALL
+    
+    SELECT * 
+    FROM {{ ref('base_additional_data__sale_items') }}
+    ), 
+
+bases_order_items_products AS (
     SELECT order_items.*, products.price
-    FROM {{ ref('base_sql_server_dbo__order_items') }} AS order_items
+    FROM bases_order_sale_items AS order_items
     INNER JOIN {{ ref('base_sql_server_dbo__products') }} AS products
     ON order_items.product_id = products.product_id
     ),
