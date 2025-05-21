@@ -1,42 +1,49 @@
-# version: 2
+version: 2
 
-# models:
-#   - name: products
-#     config:
-#       contract:
-#         enforced: true
-#     description: >
-#       Data about all products in demo.
-#     columns:
-#       - name: product_id
-#         tests:
-#           - not_null
-#         data_type: text
-#         constraints:
-#           - type: not_null
-#         description: >
-#           UUID for each unique product on platform.
-#       - name: product_name
-#         data_type: TEXT                      
-#         constraints:
-#           - type: not_null
-#         description: >
-#           Name of the product.
-#       - name: unit_price_usd
-#         data_type: real
-#         constraints:
-#           - type: not_null
-#         description: >
-#           Price of the product.
-#       - name: inventory
-#         data_type: NUMBER                      
-#         constraints:
-#           - type: not_null
-#         description: >
-#           Amount of the inventory we have for this product.
-#       - name: date_load
-#         data_type: TIMESTAMP_TZ
-#         constraints:
-#           - type: not_null   
-#         description: >
-#           Date that the data was loaded.
+models:
+  - name: budget
+    config:
+      contract:
+        enforced: true
+    description: >
+      Data about all budgets by product and month.
+
+    columns:
+      - name: product_id
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+          - type: primary_key
+        description: >
+          Hash for each unique budget, key surrogated by product_id and end of month date.
+
+      - name: product_id
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+          - type: foreign_key
+            to: ref('stg_sql_server_dbo__products')
+            to_columns: product_id
+        description: >
+          Hash for each unique product.
+
+      - name: quantity
+        data_type: NUMBER
+        constraints:
+          - type: not_null
+        description: >
+          Quantity of the product.
+
+      - name: month
+        data_type: DATE
+        constraints:
+          - type: not_null
+        description: >
+          Date of the last day of the month.
+
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        constraints:
+          - type: not_null
+        description: >
+          Date that the data was loaded.

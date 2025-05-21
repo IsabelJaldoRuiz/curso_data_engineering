@@ -4,29 +4,71 @@
   )
 }}
 
-WITH stg_orders AS (
-    SELECT * 
-    FROM {{ source('sql_server_dbo', 'orders') }}
-),
-
-renamed_casted AS (
+WITH bases_order_sale_items AS (
     SELECT
         order_id 
-        , user_id 
-        , promo_id
-        , address_id
-        , created_at_utc
-        , item_order_cost_usd
-        , shipping_cost_usd
-        , total_order_cost_usd
-        , tracking_id
+        , NULL as employee_id
         , shipping_service
-        , estimated_delivery_at_utc
-        , delivered_at_utc
-		,DATEDIFF(day, created_at_utc, delivered_at_utc) AS days_to_deliver
-        , status_order
+        , shipping_service_id 
+        , shipping_cost
+        , address_id
+        , created_at 
+        , promo_id
+        , estimated_delivery_at
+        , order_cost
+        , user_id
+        , order_total
+        , delivered_at
+        , tracking_id
+        , status
+        , is_deleted
+        , date_load 
+    FROM {{ ref('base_sql_server_dbo__orders') }}
+    
+    UNION ALL
+    
+    SELECT
+        order_id 
+        , employee_id
+        , NULL AS shipping_service
+        , NULL AS shipping_service_id 
+        , NULL AS shipping_cost
+        , NULL AS address_id
+        , created_at 
+        , NULL AS promo_id
+        , NULL AS estimated_delivery_at
+        , order_cost
+        , NULL AS user_id
+        , order_total
+        , NULL AS delivered_at
+        , NULL AS tracking_id
+        , NULL AS status
+        , is_deleted
+        , date_load 
+    FROM {{ ref('base_additional_data__sales') }}
+    ), 
+
+stg_orders AS (
+    SELECT
+        order_id 
+        , employee_id
+        , shipping_service
+        , shipping_service_id 
+        , shipping_cost
+        , address_id
+        , created_at 
+        , promo_id
+        , estimated_delivery_at
+        , order_cost
+        , user_id
+        , order_total
+        , delivered_at
+        , tracking_id
+        , status
+        , is_deleted
         , date_load
-    FROM stg_orders
+
+    FROM bases_order_sale_items
     )
 
-SELECT * FROM renamed_casted
+SELECT * FROM stg_orders

@@ -1,0 +1,92 @@
+version: 2
+
+models:
+  - name: base_addresses_info
+    config:
+      contract:
+        enforced: true
+    description: >
+      Base model that selects and casts data from the raw `addresses_info` table in the `additional_data` source.
+      It standardizes column names and data types to ensure consistent downstream modeling..
+
+    columns:
+      - name: zipcode
+        data_type: VARCHAR
+        description: >
+          Postal code used to identify geographic regions for demographic data.
+        constraints:
+          - type: not_null
+          - type: primary_key
+          # - type: foreing_key
+          #   to: source('sql_server_dbo','addresses')
+          #   field: zipcode
+
+      - name: latitude
+        data_type: FLOAT
+        description: >
+          Latitude coordinate of the location identified by the zipcode.
+        constraints:
+          - type: not_null
+
+      - name: longitude
+        data_type: FLOAT
+        description: >
+          Longitude coordinate of the location identified by the zipcode.
+        constraints:
+          - type: not_null
+
+      - name: population
+        data_type: NUMBER
+        description: >
+          Total number of people living in the area defined by the zipcode.
+        constraints:
+          - type: not_null
+
+      - name: density
+        data_type: FLOAT
+        description: >
+          Population density per square kilometer for the given zipcode.
+        constraints:
+          - type: not_null
+
+      - name: percent_male
+        data_type: FLOAT
+        description: >
+          Percentage of male residents in the zipcode area.
+        constraints:
+          - type: not_null
+
+      - name: percent_female
+        data_type: FLOAT        
+        description: >
+          Percentage of female residents in the zipcode area.
+        constraints:
+          - type: not_null
+
+      - name: average_age
+        data_type: FLOAT
+        description: >
+          Average age of residents in the zipcode area.
+        constraints:
+          - type: not_null
+
+      - name: percent_less_18_years
+        data_type: FLOAT
+        description: >
+          Percentage of the population under 18 years old.
+        constraints:
+          - type: not_null
+
+      - name: percent_18_64_years
+        data_type: FLOAT
+        description: >
+          Percentage of the population between 18 and 64 years old.
+        constraints:
+          - type: not_null
+
+      - name: percent_65_more_years
+        data_type: FLOAT
+        description: >
+          Percentage of the population aged 65 or older.
+        constraints:
+          - type: not_null

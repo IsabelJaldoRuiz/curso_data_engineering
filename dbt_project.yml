@@ -2,7 +2,7 @@
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models
-name: 'my_new_project'
+name: 'dbt_project'
 version: '1.0.0'
 config-version: 2
 
@@ -36,7 +36,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 models:
   +transient: false
-  my_new_project:
+  dbt_project:
     # Applies to all files under models/example/
 
     staging:
@@ -46,12 +46,23 @@ models:
         +schema: google_sheets
       sql_server_dbo:
         +schema: sql_server_dbo
+      additional_data:
+        +schema: additional_data
+      human_resources:
+        +schema: human_resources
       
     marts:
       +materialized: table
       +database: "{{ env_var('DBT_ENVIRONMENTS') }}_GOLD_DB"
       core:
         +schema: core
+      human_resources:
+        +schema: human_resources
+      marketing:
+        +schema: marketing
+      sales:
+        +schema: sales
+      
 seeds:
   +schema: seed_data
   +database: "{{ env_var('DBT_ENVIRONMENTS') }}_BRONZE_DB"        
