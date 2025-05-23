@@ -28,9 +28,6 @@ sources:
             tests:
               - unique
               - not_null
-              - relationships:
-                  to: source('sql_server_dbo','addresses')
-                  field: zipcode
 
           - name: latitude
             description: >
@@ -49,48 +46,56 @@ sources:
               Total number of people living in the area.
             tests:
               - not_null
+              - positive_values
 
           - name: density
             description: >
               Population density per square kilometer.
             tests:
               - not_null
+              - positive_values
 
-          - name: percentaje_male
+          - name: percentage_male
             description: >
               Percentage of male residents.
             tests:
               - not_null
+              - positive_values
 
-          - name: percentaje_female
+          - name: percentage_female
             description: >
               Percentage of female residents.
             tests:
               - not_null
+              - positive_values
 
           - name: average_age
             description: >
               Average age of residents.
             tests:
               - not_null
+              - positive_values
 
           - name: percentage_less_18_years
             description: >
               Percentage of the population under 18 years old.
             tests:
               - not_null
+              - positive_values
 
-          - name: percentaje_18_64_years
+          - name: percentage_18_64_years
             description: >
               Percentage of the population between 18 and 64 years old.
             tests:
               - not_null
+              - positive_values
 
           - name: percentage_65_more_years
             description: >
               Percentage of the population aged 65 or older.
             tests:
               - not_null
+              - positive_values
 
       - name: products_info
         description: >
@@ -103,33 +108,34 @@ sources:
             tests:
               - unique
               - not_null
-              - relationships:
-                  to: source('sql_server_dbo','products')
-                  field: name
 
           - name: weight_kg
             description: >
               Weight of the product in kilograms.
             tests:
               - not_null
+              - positive_values
 
           - name: height_cm
             description: >
               Height of the product in centimeters.
             tests:
               - not_null
+              - positive_values
 
           - name: length_cm
             description: >
               Length of the product in centimeters.
             tests:
               - not_null
+              - positive_values
 
           - name: width_cm
             description: >
               Width of the product in centimeters.
             tests:
               - not_null
+              - positive_values
   
       - name: sale_items
         description: >
@@ -148,15 +154,13 @@ sources:
               Identifier of the product sold.
             tests:
               - not_null
-              - relationships:
-                  to: source('sql_server_dbo','products')
-                  field: name
 
           - name: quantity
             description: >
               Number of units sold for the given product in the sale.
             tests:
               - not_null
+              - positive_values
 
           - name: _fivetran_deleted
             description: >
@@ -186,9 +190,6 @@ sources:
               Identifier of the employee who handled the sale.
             tests:
               - not_null
-              - relationships:
-                  to: source('human_resources','employees')
-                  field: employee_id
 
           - name: first_name
             description: >
@@ -213,21 +214,20 @@ sources:
               Identifier of the promotion applied during the sale, if any.
             tests:
               - not_null
-              - relationships:
-                  to: source('sql_server_dbo','promos')
-                  field: promo_id
 
           - name: order_cost
             description: >
               Total cost of the order before any promotion is applied.
             tests:
               - not_null
+              - positive_values
 
           - name: order_total
             description: >
               Final order value after promotions or discounts.
             tests:
               - not_null
+              - positive_values
 
           - name: _fivetran_deleted
             description: >

@@ -1,3 +1,10 @@
+{{
+    config(
+        materialized = "incremental",
+        unique_key = "shapshot_date"
+    )
+}}
+
 WITH stg_hr AS (
     SELECT * 
     FROM {{ ref('stg_human_resources__hr') }}
@@ -20,3 +27,7 @@ fct_hr AS (
     )
 
 SELECT * FROM fct_hr
+
+{% if is_incremental() %}
+	  WHERE date_load > (SELECT MAX(date_load) FROM {{ this }} )
+{% endif %}

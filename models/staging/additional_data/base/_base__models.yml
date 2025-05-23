@@ -1,14 +1,15 @@
 version: 2
 
 models:
-  - name: base_addresses_info
+  - name: base_additional_data__addresses_info
     config:
       contract:
         enforced: true
     description: >
-      Base model that selects and casts data from the raw `addresses_info` table in the `additional_data` source.
-      It standardizes column names and data types to ensure consistent downstream modeling..
-
+      Base model that casts data from the raw `addresses_info` table in the `additional_data` source.
+      It standardizes column names and data types to ensure consistent downstream modeling.
+      Data about zipcode, location, population and its distribution by gender and age.
+    
     columns:
       - name: zipcode
         data_type: VARCHAR
@@ -17,9 +18,9 @@ models:
         constraints:
           - type: not_null
           - type: primary_key
-          # - type: foreing_key
-          #   to: source('sql_server_dbo','addresses')
-          #   field: zipcode
+          - type: foreign_key
+            to: ref('base_sql_server_dbo__addresses')
+            to_columns: zipcode
 
       - name: latitude
         data_type: FLOAT
@@ -88,5 +89,180 @@ models:
         data_type: FLOAT
         description: >
           Percentage of the population aged 65 or older.
+        constraints:
+          - type: not_null
+
+
+  - name: base_additional_data__products_info
+    config:
+      contract:
+        enforced: true
+    description: >
+      Base model that casts data from the raw `products_info` table in the `additional_data` source.
+      It standardizes column names and data types to ensure consistent downstream modeling.
+      Data about physical characteristics of products, such as name, weight, and dimensions.
+
+    columns:
+      - name: name
+        data_type: VARCHAR
+        description: >
+          Name of the product.
+        constraints:
+          - type: not_null
+          - type: primary_key
+          - type: foreign_key
+            to: ref('base_sql_server_dbo__products')
+            to_columns: name
+
+      - name: weight_kg
+        data_type: FLOAT
+        description: >
+          Weight of the product in kilograms.
+        constraints:
+          - type: not_null
+
+      - name: height_cm
+        data_type: FLOAT
+        description: >
+          Height of the product in centimeters.
+        constraints:
+          - type: not_null
+
+      - name: length_cm
+        data_type: FLOAT
+        description: >
+          Length of the product in centimeters.
+        constraints:
+          - type: not_null
+
+      - name: width_cm
+        data_type: FLOAT
+        description: >
+          Width of the product in centimeters.
+        constraints:
+          - type: not_null
+
+
+  - name: base_additional_data__sale_items
+    config:
+      contract:
+        enforced: true
+    description: >
+      Base model that casts data from the raw `sale_items` table in the `additional_data` source.
+      It standardizes column names and data types to ensure consistent downstream modeling.
+      Contains detailed item-level data from sales transactions, including product references, quantities, and Fivetran metadata.
+    
+    columns:
+      - name: sale_item_id
+        data_type: VARCHAR
+        description: >
+          Unique identifier for the sale item, generated as a surrogate key from the sale and product IDs.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: sale_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key representing the sale transaction.
+        constraints:
+          - type: not_null
+          - type: foreign_key
+            to: ref('base_additional_data__sales')
+            to_columns: sale_id
+
+      - name: product_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key representing the product sold.
+        constraints:
+          - type: not_null
+          - type: foreign_key
+            to: ref('base_sql_server_dbo__products')
+            to_columns: product_id
+
+      - name: quantity
+        data_type: NUMBER
+        description: >
+          Number of units sold for the given product in the sale.
+        constraints:
+          - type: not_null
+
+      - name: is_deleted
+        data_type: BOOLEAN
+        description: >
+          Metadata flag indicating if the record was marked as deleted by Fivetran.
+
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp indicating when the record was last synced by Fivetran.
+        constraints:
+          - type: not_null
+
+
+  - name: base_additional_data__sales
+    config:
+      contract:
+        enforced: true
+    description: >
+      Base model that casts data from the raw `sales` table in the `additional_data` source.
+      It standardizes column names and data types to ensure consistent downstream modeling.
+      Captures transactional data for each physical sale, including employee and promotion references,
+      as well as financial metrics like cost and total amount.
+    
+    columns:
+      - name: order_id
+        data_type: VARCHAR
+        description: >
+          Unique identifier for the sale transaction, generated as a surrogate key from the raw sale ID.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: employee_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key generated from employee ID and name, identifying the employee associated with the sale.
+        constraints:
+          - type: not_null
+
+      - name: created_at
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp representing when the sale occurred, converted to UTC timezone.
+        constraints:
+          - type: not_null
+
+      - name: promo_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key representing the applied promotion during the sale.
+        constraints:
+          - type: not_null
+
+      - name: order_cost
+        data_type: FLOAT
+        description: >
+          Internal cost incurred for the sale (e.g., production or acquisition cost).
+        constraints:
+          - type: not_null
+
+      - name: order_total
+        data_type: FLOAT
+        description: >
+          Total amount paid by the customer for the sale.
+        constraints:
+          - type: not_null
+
+      - name: is_deleted
+        data_type: BOOLEAN
+        description: >
+          Metadata flag indicating if the record was marked as deleted by Fivetran.
+
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp indicating when the record was last synced by Fivetran.
         constraints:
           - type: not_null

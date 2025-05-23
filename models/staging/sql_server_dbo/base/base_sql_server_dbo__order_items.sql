@@ -1,3 +1,11 @@
+{{ 
+    config(
+        materialized='incremental',
+        unique_key = 'order_id',
+        on_schema_change='fail'
+    ) 
+}}
+
 WITH src_order_items AS (
     SELECT * 
     FROM {{ source('sql_server_dbo', 'order_items') }}
@@ -14,3 +22,6 @@ renamed_casted AS (
     )
 
 SELECT * FROM renamed_casted
+{% if is_incremental() %}
+	  WHERE date_load > (SELECT MAX(date_load) FROM {{ this }} )
+{% endif %}

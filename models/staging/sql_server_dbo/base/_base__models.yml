@@ -1,62 +1,304 @@
 version: 2
 
 models:
-  - name: addresses
+  - name: base_sql_server_dbo__addresses
     config:
       contract:
         enforced: true
     description: >
-      Data about all address.
+      Base model that transforms raw `addresses` data from the `sql_server_dbo` source.
+      It parses address strings into components, generates surrogate keys, and standardizes types for downstream use.
 
     columns:
-
       - name: address_id
         data_type: VARCHAR
+        description: >
+          Surrogate key uniquely identifying an address.
         constraints:
           - type: not_null
-          - type: unique
           - type: primary_key
-        description: >
-          Hash for each unique address.
 
-      # - name: old_address_id
-      #   data_type: VARCHAR
-      #   constraints:
-      #     - type: not_null
-      #   description: >
-      #     UUID for each unique address on platform.
-
-      - name: zipcode
+      - name: address_number
         data_type: NUMBER
+        description: >
+          Numeric component extracted from the beginning of the address string.
         constraints:
           - type: not_null
+
+      - name: address
+        data_type: VARCHAR
         description: >
-          Address zipcode.
+          Text portion of the address string, excluding the house/building number.
+        constraints:
+          - type: not_null
 
       - name: country
         data_type: VARCHAR
+        description: >
+          Country where the address is located.
         constraints:
           - type: not_null
-        description: >
-          Country of the address.
 
       - name: state
         data_type: VARCHAR
+        description: >
+          State or administrative division for the address.
         constraints:
           - type: not_null
+
+      - name: zipcode
+        data_type: VARCHAR
         description: >
-          State of the address.
+          Postal code of the address, left-padded with zeros to always be five digits.
+        constraints:
+          - type: not_null
+
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp of the last sync from the Fivetran connector.
+        constraints:
+          - type: not_null
 
       - name: is_deleted
         data_type: BOOLEAN
+        description: >
+          Boolean indicator for soft-deletion status by Fivetran. `true` means the row has been deleted in source.
         constraints:
           - type: not_null
+
+
+  - name: base_sql_server_dbo__order_items
+    config:
+      contract:
+        enforced: true
+    description: >
+      Base model that transforms the raw `order_items` data from the `sql_server_dbo` source.
+      It generates surrogate keys and casts data types for consistency.
+      Each row represents a specific product included in an order.
+
+    columns:
+      - name: order_item_id
+        data_type: VARCHAR
         description: >
-          Boolean indicating whether it is a deleted record or not.
-      
+          Surrogate key uniquely identifying an item in an order, generated using `order_id` and `product_id`.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: order_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key referencing the order to which the item belongs.
+        constraints:
+          - type: not_null
+          - type: foreign_key
+            to: ref('base_sql_server_dbo__orders')
+            to_columns: order_id
+
+      - name: product_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key referencing the product in the order item.
+        constraints:
+          - type: not_null
+          - type: foreign_key
+            to: ref('base_sql_server_dbo__products')
+            to_columns: product_id
+
+      - name: quantity
+        data_type: NUMBER
+        description: >
+          Quantity of the product in this specific order item.
+        constraints:
+          - type: not_null
+
       - name: date_load
         data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp when the row was last loaded from the source by Fivetran.
         constraints:
           - type: not_null
+
+      - name: is_deleted
+        data_type: BOOLEAN
         description: >
-          Date that the data was loaded.
+          Boolean indicator for soft deletion by Fivetran (true if the row is deleted).
+        constraints:
+          - type: not_null
+
+
+  - name: base_sql_server_dbo__orders
+    config:
+      contract:
+        enforced: true
+    description: >
+      Base model that standardizes raw `orders` data from the `sql_server_dbo` source.
+      Handles null/missing shipping and promo values, converts data types, and generates surrogate keys.
+
+    columns:
+      - name: order_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key uniquely identifying the order.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: shipping_service
+        data_type: VARCHAR
+        description: >
+          Name of the shipping service used. Replaces empty strings with 'non service'.
+        constraints:
+          - type: not_null
+
+      - name: shipping_service_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key for the shipping service name.
+        constraints:
+          - type: not_null
+
+      - name: shipping_cost
+        data_type: FLOAT
+        description: >
+          Cost associated with the shipping for the order.
+        constraints:
+          - type: not_null
+
+      - name: address_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key referencing the delivery address for the order.
+        constraints:
+          - type: not_null
+          - type: foreign_key
+            to: ref('base_sql_server_dbo__addresses')
+            to_columns: address_id
+
+      - name: created_at
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp indicating when the order was created. Converted to UTC.
+        constraints:
+          - type: not_null
+
+      - name: promo_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key for the promotion applied. If no promo, generates surrogate key for 'non promo'.
+        constraints:
+          - type: not_null
+
+      - name: estimated_delivery_at
+        data_type: TIMESTAMP_TZ
+        description: >
+          Estimated delivery timestamp for the order. Converted to UTC.
+
+      - name: order_cost
+        data_type: FLOAT
+        description: >
+          Cost of the order before discounts.
+        constraints:
+          - type: not_null
+
+      - name: user_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key identifying the user who placed the order.
+        constraints:
+          - type: not_null
+
+      - name: order_total
+        data_type: FLOAT
+        description: >
+          Final total amount of the order after any promotions or discounts.
+        constraints:
+          - type: not_null
+
+      - name: delivered_at
+        data_type: TIMESTAMP_TZ
+        description: >
+          Actual timestamp of order delivery. Converted to UTC.
+
+      - name: tracking_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key referencing the shipment tracking identifier.
+        constraints:
+          - type: not_null
+
+      - name: status
+        data_type: VARCHAR
+        description: >
+          Current status of the order.
+        constraints:
+          - type: not_null
+
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp of the last sync from the Fivetran connector.
+        constraints:
+          - type: not_null
+
+      - name: is_deleted
+        data_type: BOOLEAN
+        description: >
+          Boolean flag indicating if the record was soft-deleted in the source system.
+        constraints:
+          - type: not_null
+
+
+  - name: base_sql_server_dbo__products
+    config:
+      contract:
+        enforced: true
+    description: >
+      Base model that standardizes raw `products` data from the `sql_server_dbo` source.
+      Casts data types, generates surrogate keys, and enriches with Fivetran metadata.
+
+    columns:
+      - name: product_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key that uniquely identifies the product.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: price
+        data_type: FLOAT
+        description: >
+          Price of the product.
+        constraints:
+          - type: not_null
+
+      - name: name
+        data_type: VARCHAR
+        description: >
+          Name of the product.
+        constraints:
+          - type: not_null
+
+      - name: inventory
+        data_type: NUMBER
+        description: >
+          Number of units available in stock.
+        constraints:
+          - type: not_null
+
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp of the last sync from the Fivetran connector.
+        constraints:
+          - type: not_null
+
+
+      - name: is_deleted
+        data_type: BOOLEAN
+        description: >
+          Boolean flag indicating if the record was soft-deleted in the source system.
+        constraints:
+          - type: not_null

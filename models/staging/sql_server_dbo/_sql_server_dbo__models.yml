@@ -1,0 +1,653 @@
+version: 2
+
+models:
+  - name: stg_sql_server_dbo__addresses
+    config:
+      contract:
+        enforced: true
+    description: >
+      Staging model that combines base address data from `sql_server_dbo.addresses` 
+      with demographic and geographic data from `additional_data.addresses_info` using `zipcode`.
+      It enriches address records with population statistics and coordinates.
+
+    columns:
+      - name: address_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key that uniquely identifies the address record.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: address
+        data_type: VARCHAR
+        description: >
+          Street name portion of the address.
+        constraints:
+          - type: not_null
+
+      - name: address_number
+        data_type: NUMBER
+        description: >
+          Numeric portion of the street address.
+        constraints:
+          - type: not_null
+
+      - name: state
+        data_type: VARCHAR
+        description: >
+          State or province in which the address is located.
+        constraints:
+          - type: not_null
+
+      - name: country
+        data_type: VARCHAR
+        description: >
+          Country of the address.
+        constraints:
+          - type: not_null
+
+      - name: zipcode
+        data_type: VARCHAR
+        description: >
+          Postal code of the address, used to join with additional demographic data.
+        constraints:
+          - type: not_null
+
+      - name: latitude
+        data_type: FLOAT
+        description: >
+          Latitude coordinate of the location.
+        constraints:
+          - type: not_null
+
+      - name: longitude
+        data_type: FLOAT
+        description: >
+          Longitude coordinate of the location.
+        constraints:
+          - type: not_null
+
+      - name: population
+        data_type: NUMBER
+        description: >
+          Estimated population in the area of the zipcode.
+        constraints:
+          - type: not_null
+
+      - name: density
+        data_type: FLOAT
+        description: >
+          Population density (people per square kilometer) for the zipcode.
+        constraints:
+          - type: not_null
+
+      - name: percent_male
+        data_type: FLOAT
+        description: >
+          Percentage of male residents in the zipcode area.
+        constraints:
+          - type: not_null
+
+      - name: percent_female
+        data_type: FLOAT
+        description: >
+          Percentage of female residents in the zipcode area.
+        constraints:
+          - type: not_null
+
+      - name: average_age
+        data_type: FLOAT
+        description: >
+          Average age of the population in the zipcode area.
+        constraints:
+          - type: not_null
+
+      - name: percent_less_18_years
+        data_type: FLOAT
+        description: >
+          Percentage of the population under 18 years old in the zipcode area.
+        constraints:
+          - type: not_null
+
+      - name: percent_18_64_years
+        data_type: FLOAT
+        description: >
+          Percentage of the population between 18 and 64 years old.
+        constraints:
+          - type: not_null
+
+      - name: percent_65_more_years
+        data_type: FLOAT
+        description: >
+          Percentage of the population 65 years or older.
+        constraints:
+          - type: not_null
+
+      - name: is_deleted
+        data_type: BOOLEAN
+        description: >
+          Flag indicating if the address was soft-deleted in the source system.
+        constraints:
+          - type: not_null
+
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp indicating when the record was last loaded by Fivetran.
+        constraints:
+          - type: not_null
+
+  - name: stg_sql_server_dbo__events
+    config:
+      contract:
+        enforced: true
+    description: >
+      Staging model that processes raw event tracking data from `sql_server_dbo.events`.
+      It standardizes keys and timestamps, and generates surrogate identifiers for user, session, and related entities.
+
+    columns:
+      - name: event_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key that uniquely identifies each event record.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: page_url
+        data_type: VARCHAR
+        description: >
+          URL of the webpage where the event occurred.
+        constraints:
+          - type: not_null
+
+      - name: event_type
+        data_type: VARCHAR
+        description: >
+          Descriptive label for the type of event (e.g. click, view, add_to_cart).
+        constraints:
+          - type: not_null
+
+      - name: event_type_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key generated from the `event_type` value.
+        constraints:
+          - type: not_null
+
+      - name: user_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key representing the user who triggered the event.
+        constraints:
+          - type: not_null
+          - type: foreign_key
+            to: ref('stg_sql_server_dbo__users')
+            to_columns: user_id
+
+      - name: product_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key of the product associated with the event (if any).
+        constraints:
+          - type: not_null
+          - type: foreign_key
+            to: ref('stg_sql_server_dbo__products')
+            to_columns: product_id
+
+      - name: session_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key of the session during which the event occurred.
+        constraints:
+          - type: not_null
+
+      - name: created_at
+        data_type: TIMESTAMP_TZ
+        description: >
+          UTC timestamp of when the event occurred.
+        constraints:
+          - type: not_null
+
+      - name: order_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key of the related order, if the event is associated with a transaction.
+        constraints:
+          - type: not_null
+          - type: foreign_key
+            to: ref('stg_sql_server_dbo__orders')
+            to_columns: order_id
+
+      - name: is_deleted
+        data_type: BOOLEAN
+        description: >
+          Flag indicating whether the event was marked as deleted in the source.
+        constraints:
+          - type: not_null
+
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp indicating when the record was last updated or loaded by Fivetran.
+        constraints:
+          - type: not_null
+
+
+  - name: stg_sql_server_dbo__order_items
+    config:
+      contract:
+        enforced: true
+    description: >
+      Staging model that consolidates order items and sale items from different sources,
+      enriching them with product price information.
+
+    columns:
+      - name: order_item_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key generated from `order_id` and `product_id` to uniquely identify each item in an order.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: order_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key identifying the order to which the item belongs.
+        constraints:
+          - type: not_null
+          - type: foreign_key
+            to: ref('stg_sql_server_dbo__orders')
+            to_columns: order_id
+
+      - name: product_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key for the purchased product.
+        constraints:
+          - type: not_null
+          - type: foreign_key
+            to: ref('stg_sql_server_dbo__products')
+            to_columns: product_id
+
+      - name: quantity
+        data_type: NUMBER
+        description: >
+          Number of units of the product included in the order.
+        constraints:
+          - type: not_null
+
+      - name: price
+        data_type: FLOAT
+        description: >
+          Unit price of the product at the time of order or sale.
+        constraints:
+          - type: not_null
+
+      - name: is_deleted
+        data_type: BOOLEAN
+        description: >
+          Boolean flag indicating whether the record has been marked as deleted by the source system.
+        constraints:
+          - type: not_null
+
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp when the data was last updated or synchronized via Fivetran.
+        constraints:
+          - type: not_null
+
+
+  - name: stg_sql_server_dbo__orders
+    config:
+      contract:
+        enforced: true
+    description: >
+      Staging model that combines order data from the operational orders table
+      and additional sales data. Normalizes fields to support downstream analysis
+      regardless of the data source.
+
+    columns:
+      - name: order_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key uniquely identifying the order.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: employee_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key for the employee associated with the sale (only for sales data).
+        constraints:
+          - type: foreign_key
+            to: ref('stg_human_resources__employees')
+            to_columns: employee_id
+
+      - name: shipping_service
+        data_type: VARCHAR
+        description: >
+          Name of the shipping service used for the order.
+
+      - name: shipping_service_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key derived from the shipping service.
+
+      - name: shipping_cost
+        data_type: FLOAT
+        description: >
+          Cost associated with shipping the order.
+
+      - name: address_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key for the delivery address.
+        constraints:
+          - type: foreign_key
+            to: ref('stg_sql_server_dbo__addresses')
+            to_columns: address_id
+
+      - name: created_at
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp indicating when the order or sale was created.
+        constraints:
+          - type: not_null
+
+      - name: promo_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key of the promotion applied to the order (if any).
+        constraints:
+          - type: foreign_key
+            to: ref('stg_sql_server_dbo__promos')
+            to_columns: promo_id
+
+      - name: estimated_delivery_at
+        data_type: TIMESTAMP_TZ
+        description: >
+          Estimated timestamp when the order is expected to be delivered.
+
+      - name: order_cost
+        data_type: FLOAT
+        description: >
+          Total cost of the items in the order, before discounts and shipping.
+        constraints:
+          - type: not_null
+
+      - name: user_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key for the user who placed the order.
+        constraints:
+          - type: foreign_key
+            to: ref('stg_sql_server_dbo__users')
+            to_columns: user_id
+
+      - name: order_total
+        data_type: FLOAT
+        description: >
+          Final total amount for the order, including discounts and shipping.
+        constraints:
+          - type: not_null
+
+      - name: delivered_at
+        data_type: TIMESTAMP_TZ
+        description: >
+          Actual delivery timestamp of the order.
+
+      - name: tracking_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key representing the tracking number of the shipment.
+
+      - name: status
+        data_type: VARCHAR
+        description: >
+          Status of the order at the time of data capture (e.g., delivered, cancelled).
+        constraints:
+          - type: not_null
+
+      - name: is_deleted
+        data_type: BOOLEAN
+        description: >
+          Boolean flag indicating whether the record has been marked as deleted by the source system.
+        constraints:
+          - type: not_null
+
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp indicating when the record was loaded or updated.
+        constraints:
+          - type: not_null
+
+
+  - name: stg_sql_server_dbo__products
+    config:
+      contract:
+        enforced: true
+    description: >
+      Staging model that combines product base data with additional product info
+      such as dimensions and weight. Data is joined by product name.
+
+    columns:
+      - name: product_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key uniquely identifying the product.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: name
+        data_type: VARCHAR
+        description: >
+          Name of the product.
+        constraints:
+          - type: not_null
+
+      - name: inventory
+        data_type: NUMBER
+        description: >
+          Current inventory count available for the product.
+        constraints:
+          - type: not_null
+
+      - name: weight_kg
+        data_type: FLOAT
+        description: >
+          Weight of the product in kilograms.
+        constraints:
+          - type: not_null
+
+      - name: height_cm
+        data_type: FLOAT
+        description: >
+          Height of the product in centimeters.
+        constraints:
+          - type: not_null
+
+      - name: length_cm
+        data_type: FLOAT
+        description: >
+          Length of the product in centimeters.
+        constraints:
+          - type: not_null
+
+      - name: width_cm
+        data_type: FLOAT
+        description: >
+          Width of the product in centimeters.
+        constraints:
+          - type: not_null
+
+      - name: is_deleted
+        data_type: BOOLEAN
+        description: >
+          Boolean flag indicating whether the product record has been marked as deleted.
+        constraints:
+          - type: not_null
+
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp when the product record was last loaded or updated.
+        constraints:
+          - type: not_null
+
+
+  - name: stg_sql_server_dbo__promos
+    config:
+      contract:
+        enforced: true
+    description: >
+      Staging model for promotions, combining source data with a default "non promo"
+      record to ensure referential integrity in downstream models.
+
+    columns:
+      - name: promo_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key that uniquely identifies a promotion.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: promo_desc
+        data_type: VARCHAR
+        description: >
+          Human-readable description of the promotion, generated from the original promo_id.
+        constraints:
+          - type: not_null
+
+      - name: discount
+        data_type: NUMBER
+        description: >
+          Discount percentage or value associated with the promotion.
+        constraints:
+          - type: not_null
+
+      - name: status
+        data_type: VARCHAR
+        description: >
+          Status of the promotion, e.g., 'active', 'inactive'.
+        constraints:
+          - type: not_null
+
+      - name: is_deleted
+        data_type: BOOLEAN
+        description: >
+          Boolean indicating if the promo record was marked as deleted in the source.
+        constraints:
+          - type: not_null
+
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp of the last data sync via Fivetran.
+        constraints:
+          - type: not_null
+
+
+  - name: stg_sql_server_dbo__users
+    config:
+      contract:
+        enforced: true
+    description: >
+      Staging model for users. It includes validation flags for email and phone number
+      formats, and maps foreign keys and metadata for further transformations.
+
+    columns:
+      - name: user_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key that uniquely identifies a user.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: first_name
+        data_type: VARCHAR
+        description: >
+          User's first name.
+        constraints:
+          - type: not_null
+
+      - name: last_name
+        data_type: VARCHAR
+        description: >
+          User's last name.
+        constraints:
+          - type: not_null
+
+      - name: phone_number
+        data_type: VARCHAR
+        description: >
+          User's phone number, expected format: 123-456-7890.
+        constraints:
+          - type: not_null
+
+      - name: is_phone_number_valid
+        data_type: BOOLEAN
+        description: >
+          Boolean indicating if the phone number matches the expected pattern.
+        constraints:
+          - type: not_null
+
+      - name: email
+        data_type: VARCHAR
+        description: >
+          User's email address.
+        constraints:
+          - type: not_null
+
+      - name: is_email_valid
+        data_type: BOOLEAN
+        description: >
+          Boolean indicating if the email address has a valid format.
+        constraints:
+          - type: not_null
+
+      - name: address_id
+        data_type: VARCHAR
+        description: >
+          Surrogate foreign key pointing to the user's address.
+        constraints:
+          - type: not_null
+          - type: foreign_key
+            to: ref('stg_sql_server_dbo__addresses')
+            to_columns: address_id
+
+      - name: created_at
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp of when the user record was created.
+        constraints:
+          - type: not_null
+
+      - name: updated_at
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp of last update, or '9999-12-31' if no update is recorded.
+        constraints:
+          - type: not_null
+
+      - name: is_deleted
+        data_type: BOOLEAN
+        description: >
+          Boolean indicating if the user record was marked as deleted in the source.
+        constraints:
+          - type: not_null
+
+      - name: date_load
+        data_type: TIMESTAMP_TZ
+        description: >
+          Timestamp of the last sync from the source system (via Fivetran).
+        constraints:
+          - type: not_null

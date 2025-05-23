@@ -1,7 +1,9 @@
-{{
-  config(
-    materialized='view'
-  )
+{{ 
+    config(
+        materialized='incremental',
+        unique_key = 'order_id',
+        on_schema_change='fail'
+    ) 
 }}
 
 WITH bases_order_sale_items AS (
@@ -69,6 +71,10 @@ stg_orders AS (
         , date_load
 
     FROM bases_order_sale_items
-    )
+)
 
 SELECT * FROM stg_orders
+
+{% if is_incremental() %}
+	  WHERE date_load > (SELECT MAX(date_load) FROM {{ this }} )
+{% endif %}

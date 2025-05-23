@@ -1,0 +1,8 @@
+-- SELECT order_id, promos.status, orders.order_total, orders.order_cost, orders.shipping_cost, promos.discount
+-- FROM {{ ref('stg_sql_server_dbo__orders') }} AS orders
+-- LEFT JOIN {{ ref('stg_sql_server_dbo__promos') }} AS promos
+--     ON orders.promo_id = promos.promo_id
+-- WHERE 
+--     ( promos.status = 'active' AND (orders.order_total != (orders.order_cost + orders.shipping_cost - promos.discount)) )
+--     OR 
+--     ( promos.status = 'inactive' AND (orders.order_total != (orders.order_cost + orders.shipping_cost)) )

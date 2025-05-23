@@ -1,0 +1,122 @@
+version: 2
+
+models:
+  - name: base_human_resources__employees_snapshots
+    config:
+      contract:
+        enforced: true
+    description: >
+      Base model that casts and transforms data from the raw `employees_snapshots` table in the `human_resources` source.
+      It standardizes column names and data types to support consistent and efficient downstream HR analytics.
+      Each record represents a monthly or periodic HR snapshot per employee, including their role, performance,
+      training, engagement, salary, and attrition risk metrics.
+
+    columns:
+      - name: snapshot_id
+        data_type: VARCHAR
+        description: >
+          Unique identifier for the employee snapshot, generated from employee ID and snapshot date.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: employee_id
+        data_type: VARCHAR
+        description: >
+          Surrogate employee identifier generated from first name, last name, and raw employee ID fields.
+        constraints:
+          - type: not_null
+
+      - name: job_title
+        data_type: VARCHAR
+        description: >
+          Employee's job title at the time of the snapshot.
+        constraints:
+          - type: not_null
+
+      - name: department
+        data_type: VARCHAR
+        description: >
+          Department to which the employee belonged during the snapshot period.
+        constraints:
+          - type: not_null
+
+      - name: business_unit
+        data_type: VARCHAR
+        description: >
+          The business unit associated with the employee's role during the snapshot.
+        constraints:
+          - type: not_null
+
+      - name: job_level
+        data_type: NUMBER
+        description: >
+          Job level or grade assigned to the employee at the time of the snapshot.
+        constraints:
+          - type: not_null
+
+      - name: training_count
+        data_type: NUMBER
+        description: >
+          Number of training sessions completed by the employee to date.
+        constraints:
+          - type: not_null
+
+      - name: last_training_date
+        data_type: DATE
+        description: >
+          Date of the most recent training completed by the employee.
+
+      - name: promotion_count
+        data_type: NUMBER
+        description: >
+          Number of promotions the employee has received up to the snapshot date.
+        constraints:
+          - type: not_null
+
+      - name: last_promotion_date
+        data_type: DATE
+        description: >
+          Date of the employee's most recent promotion.
+
+      - name: shapshot_date
+        data_type: DATE
+        description: >
+          The date the snapshot was recorded for the employee.
+        constraints:
+          - type: not_null
+
+      - name: tenure_months
+        data_type: NUMBER
+        description: >
+          Total number of months the employee has been employed by the organization at the snapshot date.
+        constraints:
+          - type: not_null
+
+      - name: performance_rating
+        data_type: FLOAT
+        description: >
+          Performance rating score assigned to the employee at the time of the snapshot.
+        constraints:
+          - type: not_null
+
+      - name: current_salary
+        data_type: NUMBER
+        description: >
+          The employee's base salary at the time of the snapshot.
+        constraints:
+          - type: not_null
+
+      - name: engagement_score
+        data_type: FLOAT
+        description: >
+          Engagement level score representing the employee's sentiment or motivation.
+        constraints:
+          - type: not_null
+
+      - name: risk_of_exit_score
+        data_type: FLOAT
+        description: >
+          Score predicting the likelihood of the employee leaving the organization.
+        constraints:
+          - type: not_null

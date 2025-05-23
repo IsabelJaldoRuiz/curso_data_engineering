@@ -1,7 +1,9 @@
-{{
-  config(
-    materialized='view'
-  )
+{{ 
+    config(
+        materialized='incremental',
+        unique_key = 'event_id',
+        on_schema_change='fail'
+    ) 
 }}
 
 WITH src_events AS (
@@ -26,3 +28,7 @@ stg_events AS (
     )
 
 SELECT * FROM stg_events
+
+{% if is_incremental() %}
+	  WHERE date_load > (SELECT MAX(date_load) FROM {{ this }} )
+{% endif %}

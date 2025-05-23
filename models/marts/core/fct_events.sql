@@ -1,3 +1,10 @@
+{{
+    config(
+        materialized = "incremental",
+        unique_key = "created_at_date"
+    )
+}}
+
 WITH stg_events AS (
     SELECT * 
     FROM {{ ref('stg_sql_server_dbo__events') }}
@@ -18,3 +25,7 @@ fct_events AS (
     )
 
 SELECT * FROM fct_events
+
+{% if is_incremental() %}
+	  WHERE date_load > (SELECT MAX(date_load) FROM {{ this }} )
+{% endif %}

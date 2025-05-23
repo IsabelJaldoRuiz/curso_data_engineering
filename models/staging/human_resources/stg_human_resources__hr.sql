@@ -1,5 +1,13 @@
+{{ 
+    config(
+        materialized='incremental',
+        unique_key = 'snapshot_id',
+        on_schema_change='fail'
+    ) 
+}}
+
 WITH base_employees_snapshots AS (
-    SELECT * 
+    SELECT *
     FROM {{ ref('base_human_resources__employees_snapshots') }}
     ),
 
@@ -22,3 +30,6 @@ stg_hr AS (
     )
 
 SELECT * FROM stg_hr
+{% if is_incremental() %}
+	  WHERE shapshot_date > (SELECT MAX(shapshot_date) FROM {{ this }} )
+{% endif %}

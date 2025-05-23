@@ -1,9 +1,3 @@
-{{
-  config(
-    materialized='view'
-  )
-}}
-
 WITH stg_orders AS (
     SELECT * 
     FROM {{ ref('stg_sql_server_dbo__orders') }}

@@ -1,9 +1,3 @@
-{{
-  config(
-    materialized='view'
-  )
-}}
-
 WITH bases_products_products_info AS (
     SELECT products.*
         , weight_kg

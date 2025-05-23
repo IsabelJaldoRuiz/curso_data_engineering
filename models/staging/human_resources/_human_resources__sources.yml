@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: human_resources
     description: >
-      Raw data from about human resources of the bussiness.
+      Raw HR data containing employee records and monthly employee snapshots.
     schema: human_resources
     database: "{{ env_var('DBT_ENVIRONMENTS') }}_BRONZE_DB"
 
@@ -16,21 +16,511 @@ sources:
       warn_after: { count: 24, period: hour }
       error_after: { count: 1000, period: day }
 
+    
     tables:
       - name: employees
         description: >
-          Data about employees.
-        # columns:
+          Base table containing detailed demographic, compensation, and employment information for each employee.
+        columns:
+          - name: EMPLOYEE_ID
+            description: >
+              Unique identifier for each employee.
+            tests:
+              - not_null
+              - unique
 
-        #   - name: zipcode
-        #     description: >
-        #       .
-        #     tests:
-        #       - unique
-        #       - not_null
-        #       - relationships:
-        #           to: source('sql_server_dbo','products')
-        #           field: product_id
+          - name: FIRST_NAME
+            description: >
+              Employee's first name.
+            tests:
+              - not_null
+              
+          - name: LAST_NAME
+            description: >
+              Employee's last name.
+            tests:
+              - not_null
+
+          - name: GENDER
+            description: >
+              Employee's gender.
+            tests:
+              - not_null
+
+          - name: PRONOUNS
+            description: >
+              Preferred pronouns of the employee.
+            tests:
+              - not_null
+
+          - name: AGE
+            description: >
+              Age of the employee.
+            tests:
+              - not_null
+              - positive_values
+
+          - name: BIRTH_DATE
+            description: >
+              Date of birth of the employee.
+            tests:
+              - not_null
+
+          - name: DEPARTMENT
+            description: >
+              Department the employee belongs to.
+            tests:
+              - not_null
+
+          - name: BUSINESS_UNIT
+            description: >
+              Business unit associated with the employee.
+            tests:
+              - not_null
+
+          - name: JOB_LEVEL
+            description: > 
+              Job level or grade.
+            tests:
+              - not_null
+
+          - name: JOB_TITLE
+            description: >
+              Title of the employee's role.
+            tests:
+              - not_null
+
+          - name: LOCATION
+            description: >
+              Location of the employee.
+            tests:
+              - not_null
+
+          - name: MANAGER_ID
+            description: >
+              Identifier of the employee's manager.
+
+          - name: BASE_SALARY
+            description: >
+              Base salary of the employee.
+            tests:
+              - not_null
+              - positive_values
+
+          - name: BONUS_ELIGIBLE
+            description: >
+              Whether the employee is eligible for a bonus.
+            tests:
+              - not_null
+
+          - name: BONUS_PCT
+            description: >
+              Bonus percentage if eligible.
+            tests:
+              - not_null
+
+          - name: EQUITY_GRANT
+            description: >
+              Whether the employee has received an equity grant.
+            tests:
+              - not_null
+
+          - name: EQUITY_PCT
+            description: >
+              Equity percentage if granted.
+            tests:
+              - not_null
+
+          - name: EMPLOYMENT_TYPE
+            description: >
+              Type of employment (e.g., full-time, part-time).
+            tests:
+              - not_null
+
+          - name: EMPLOYMENT_STATUS
+            description: >
+              Employment status (e.g., active, terminated).
+            tests:
+              - not_null
+
+          - name: HIRE_DATE
+            description: >
+              Date when the employee was hired.
+            tests:
+              - not_null
+
+          - name: TERMINATION_DATE
+            description: >
+              Date when the employee was terminated, if applicable.
+          
+          - name: ETHNICITY
+            description: >
+              Self-reported ethnicity.
+            tests:
+              - not_null
+
+          - name: MARITAL_STATUS
+            description: >
+              Marital status of the employee.
+            tests:
+              - not_null
+
+          - name: EDUCATION_LEVEL
+            description: >
+              Highest education level attained.
+            tests:
+              - not_null
+
+          - name: PAY_FREQUENCY
+            description: >
+              Frequency of salary payments.
+            tests:
+              - not_null
+
+          - name: VETERAN_STATUS
+            description: >
+              Veteran status of the employee.
+            tests:
+              - not_null
+
+          - name: DISABILITY_STATUS
+            description: >
+              Disability status of the employee.
+            tests:
+              - not_null
+
+          - name: COST_CENTER
+            description: >
+              Cost center to which the employee is assigned.
+            tests:
+              - not_null
+
+          - name: FTE
+            description: >
+              Full-time equivalent (FTE) percentage.
+            tests:
+              - not_null
+              - positive_values
+
+          - name: EXEMPTION_STATUS
+            description: >
+              FLSA exemption status.
+            tests:
+              - not_null
+
+          - name: HIGH_POTENTIAL_FLAG
+            description: >
+              Indicates if the employee is identified as high potential.
+            tests:
+              - not_null
+
+          - name: SUCCESSION_PLAN_STATUS
+            description: >
+              Status in succession planning.
+            tests:
+              - not_null
+
+          - name: AIHR_CERTIFIED
+            description: >
+              Whether the employee holds AIHR certification.
+            tests:
+              - not_null
+
+          - name: TRAINING_COUNT
+            description: >
+              Number of trainings completed.
+            tests:
+              - not_null
+              - positive_values
+
+          - name: LAST_TRAINING_DATE
+            description: >
+              Most recent training completion date.
+
+          - name: PROMOTION_COUNT
+            description: >
+              Number of promotions.
+            tests:
+              - not_null
+              - positive_values
+
+          - name: LAST_PROMOTION_DATE
+            description: >
+              Date of the last promotion.
+
       - name: employees_snapshots
         description: >
-          Data about employees.
+          Snapshot table capturing historical monthly HR data for employees, including job, performance, salary, and engagement metrics.
+        columns:
+          - name: EMPLOYEE_ID
+            description: >
+              Unique identifier for each employee.
+            tests:
+              - not_null
+
+          - name: SNAPSHOT_DATE
+            description: >
+              Date when the snapshot was taken.
+            tests:
+              - not_null
+
+          - name: FIRST_NAME
+            description: >
+              Employee's first name.
+            tests:
+              - not_null
+              
+          - name: LAST_NAME
+            description: >
+              Employee's last name.
+            tests:
+              - not_null
+
+          - name: GENDER
+            description: >
+              Employee's gender.
+            tests:
+              - not_null
+
+          - name: PRONOUNS
+            description: >
+              Preferred pronouns of the employee.
+            tests:
+              - not_null
+
+          - name: AGE
+            description: >
+              Age of the employee.
+            tests:
+              - not_null
+              - positive_values
+
+          - name: BIRTH_DATE
+            description: >
+              Date of birth of the employee.
+            tests:
+              - not_null
+
+          - name: DEPARTMENT
+            description: >
+              Department the employee belongs to.
+            tests:
+              - not_null
+
+          - name: BUSINESS_UNIT
+            description: >
+              Business unit associated with the employee.
+            tests:
+              - not_null
+
+          - name: JOB_LEVEL
+            description: > 
+              Job level or grade.
+            tests:
+              - not_null
+
+          - name: JOB_TITLE
+            description: >
+              Title of the employee's role.
+            tests:
+              - not_null
+
+          - name: LOCATION
+            description: >
+              Location of the employee.
+            tests:
+              - not_null
+
+          - name: MANAGER_ID
+            description: >
+              Identifier of the employee's manager.
+
+          - name: BASE_SALARY
+            description: >
+              Base salary of the employee.
+            tests:
+              - not_null
+              - positive_values
+
+          - name: BONUS_ELIGIBLE
+            description: >
+              Whether the employee is eligible for a bonus.
+            tests:
+              - not_null
+
+          - name: BONUS_PCT
+            description: >
+              Bonus percentage if eligible.
+            tests:
+              - not_null
+
+          - name: EQUITY_GRANT
+            description: >
+              Whether the employee has received an equity grant.
+            tests:
+              - not_null
+
+          - name: EQUITY_PCT
+            description: >
+              Equity percentage if granted.
+            tests:
+              - not_null
+
+          - name: EMPLOYMENT_TYPE
+            description: >
+              Type of employment (e.g., full-time, part-time).
+            tests:
+              - not_null
+
+          - name: EMPLOYMENT_STATUS
+            description: >
+              Employment status (e.g., active, terminated).
+            tests:
+              - not_null
+
+          - name: HIRE_DATE
+            description: >
+              Date when the employee was hired.
+            tests:
+              - not_null
+
+          - name: TERMINATION_DATE
+            description: >
+              Date when the employee was terminated, if applicable.
+          
+          - name: ETHNICITY
+            description: >
+              Self-reported ethnicity.
+            tests:
+              - not_null
+
+          - name: MARITAL_STATUS
+            description: >
+              Marital status of the employee.
+            tests:
+              - not_null
+
+          - name: EDUCATION_LEVEL
+            description: >
+              Highest education level attained.
+            tests:
+              - not_null
+
+          - name: PAY_FREQUENCY
+            description: >
+              Frequency of salary payments.
+            tests:
+              - not_null
+
+          - name: VETERAN_STATUS
+            description: >
+              Veteran status of the employee.
+            tests:
+              - not_null
+
+          - name: DISABILITY_STATUS
+            description: >
+              Disability status of the employee.
+            tests:
+              - not_null
+
+          - name: COST_CENTER
+            description: >
+              Cost center to which the employee is assigned.
+            tests:
+              - not_null
+
+          - name: FTE
+            description: >
+              Full-time equivalent (FTE) percentage.
+            tests:
+              - not_null
+              - positive_values
+
+          - name: EXEMPTION_STATUS
+            description: >
+              FLSA exemption status.
+            tests:
+              - not_null
+
+          - name: HIGH_POTENTIAL_FLAG
+            description: >
+              Indicates if the employee is identified as high potential.
+            tests:
+              - not_null
+
+          - name: SUCCESSION_PLAN_STATUS
+            description: >
+              Status in succession planning.
+            tests:
+              - not_null
+
+          - name: AIHR_CERTIFIED
+            description: >
+              Whether the employee holds AIHR certification.
+            tests:
+              - not_null
+
+          - name: TRAINING_COUNT
+            description: >
+              Number of trainings completed.
+            tests:
+              - not_null
+              - positive_values
+
+          - name: LAST_TRAINING_DATE
+            description: >
+              Most recent training completion date.
+
+          - name: PROMOTION_COUNT
+            description: >
+              Number of promotions.
+            tests:
+              - not_null
+              - positive_values
+
+          - name: LAST_PROMOTION_DATE
+            description: >
+              Date of the last promotion.
+
+          - name: TENURE_MONTHS
+            description: >
+              Tenure of the employee in months.
+            tests:
+              - not_null
+              - positive_values
+              
+          - name: PERFORMANCE_RATING
+            description: >
+              Performance rating score at snapshot.
+            tests:
+              - not_null
+              - positive_values
+
+          - name: CURRENT_SALARY
+            description: >
+              Current salary during snapshot.
+            tests:
+              - not_null
+              - positive_values
+
+          - name: ENGAGEMENT_SCORE
+            description: >
+              Engagement score at time of snapshot.
+            tests:
+              - not_null
+              - positive_values
+
+          - name: RISK_OF_EXIT_SCORE
+            description: >
+              Risk of employee exiting the company.
+            tests:
+              - not_null
+              - positive_values
+
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns:
+                - EMPLOYEE_ID
+                - SNAPSHOT_DATE
+          

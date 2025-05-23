@@ -1,0 +1,338 @@
+version: 2
+
+models:
+  - name: stg_human_resources__employees
+    config:
+      contract:
+        enforced: true
+    description: >
+      Staging model that casts and cleans data from the raw `employees` table in the
+      `human_resources` source. It standardizes column names, applies surrogate keys,
+      and prepares the data for consistent downstream HR analytics.
+
+    columns:
+      - name: employee_id
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+          - type: unique
+        description: >
+          Surrogate key generated from employee_id, first_name and last_name
+          to uniquely identify each employee.
+
+      - name: first_name
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          Employee's first name.
+
+      - name: last_name
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          Employee's last name.
+
+      - name: gender
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          Gender of the employee.
+
+      - name: pronouns
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          Preferred pronouns of the employee.
+
+      - name: age
+        data_type: NUMBER
+        constraints:
+          - type: not_null
+        description: >
+          Age of the employee.
+
+      - name: birth_date
+        data_type: DATE
+        constraints:
+          - type: not_null
+        description: >
+          Date of birth of the employee.
+
+      - name: location
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          Cleaned location of the employee (only the first part before comma if present).
+
+      - name: base_salary
+        data_type: NUMBER
+        constraints:
+          - type: not_null
+        description: >
+          Annual base salary of the employee.
+
+      - name: is_bonus_eligible
+        data_type: BOOLEAN
+        constraints:
+          - type: not_null
+        description: >
+          Whether the employee is eligible for a bonus.
+
+      - name: bonus_pct
+        data_type: FLOAT
+        constraints:
+          - type: not_null
+        description: >
+          Percentage of salary assigned as a bonus.
+
+      - name: is_equity_grant
+        data_type: BOOLEAN
+        constraints:
+          - type: not_null
+        description: >
+          Whether the employee has received an equity grant.
+
+      - name: equity_ptc
+        data_type: FLOAT
+        constraints:
+          - type: not_null
+        description: >
+          Percentage of equity granted to the employee.
+
+      - name: employment_type
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          Type of employment (e.g., Full-Time, Contractor, Part-Time).
+
+      - name: employment_status
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          Current status of the employee (e.g., Active, Terminated).
+
+      - name: hire_date
+        data_type: DATE
+        constraints:
+          - type: not_null
+        description: >
+          Date the employee was hired.
+
+      - name: termination_date
+        data_type: DATE
+        constraints:
+          - type: not_null
+        description: >
+          Date the employee was terminated, if applicable.
+
+      - name: ethnicity
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          Ethnic group the employee identifies with.
+
+      - name: marital_status
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          Marital status of the employee.
+
+      - name: education_level
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          Highest level of education attained by the employee.
+
+      - name: fte
+        data_type: FLOAT
+        constraints:
+          - type: not_null
+        description: >
+          Full-time equivalency metric for the employee.
+
+      - name: exemption_status
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          Indicates whether the employee is exempt from overtime regulations.
+
+      - name: is_high_potential
+        data_type: BOOLEAN
+        constraints:
+          - type: not_null
+        description: >
+          Whether the employee is considered high potential talent.
+
+      - name: succession_plan_status
+        data_type: VARCHAR
+        constraints:
+          - type: not_null
+        description: >
+          Succession planning status of the employee.
+
+      - name: is_aihr_certified
+        data_type: BOOLEAN
+        constraints:
+          - type: not_null
+        description: >
+          Whether the employee holds AIHR certification.
+
+
+  - name: stg_human_resources__hr
+    description: >
+      Staging model that prepares and standardizes historical HR data from employee snapshots.
+      It includes information about training, promotions, tenure, salary, and performance metrics
+      for each employee snapshot.
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: snapshot_id
+        data_type: VARCHAR
+        description: >
+          Unique identifier for each snapshot record, generated using employee and snapshot date.
+        constraints:
+          - type: not_null
+          - type: primary_key
+
+      - name: employee_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key for employee identity across snapshots.
+        constraints:
+          - type: not_null
+          # - type: foreign_key
+          #   to: ref('stg_human_resources__employees')
+          #   to_columns: [employee_id]
+          #   warn_unenforced: true
+
+      - name: job_possition_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key representing the employee's job position at the time of snapshot.
+        constraints:
+          - type: not_null
+          # - type: foreign_key
+          #   to: ref('stg_human_resources__job_possitions')
+          #   to_columns: [job_possition_id]
+          #   warn_unenforced: true
+
+      - name: training_count
+        data_type: NUMBER
+        description: >
+          Total number of training sessions completed by the employee as of the snapshot.
+        constraints:
+          - type: not_null
+
+      - name: last_training_date
+        data_type: DATE
+        description: >
+          Date of the employee's most recent training at the time of the snapshot.
+
+      - name: promotion_count
+        data_type: NUMBER
+        description: >
+          Cumulative number of promotions received by the employee.
+        constraints:
+          - type: not_null
+
+      - name: last_promotion_date
+        data_type: DATE
+        description: >
+          Date of the employee's most recent promotion.
+
+      - name: shapshot_date
+        data_type: DATE
+        description: >
+          Date when the employee data snapshot was taken.
+        constraints:
+          - type: not_null
+
+      - name: tenure_months
+        data_type: NUMBER
+        description: >
+          Number of months the employee has been employed at the time of the snapshot.
+        constraints:
+          - type: not_null
+
+      - name: performance_rating
+        data_type: FLOAT
+        description: >
+          Performance rating score given to the employee.
+        constraints:
+          - type: not_null
+
+      - name: current_salary
+        data_type: NUMBER
+        description: >
+          The current salary of the employee at the time of the snapshot.
+        constraints:
+          - type: not_null
+
+      - name: engagement_score
+        data_type: FLOAT
+        description: >
+          Score representing the employee's level of engagement.
+        constraints:
+          - type: not_null
+
+      - name: risk_of_exit_score
+        data_type: FLOAT
+        description: >
+          Estimated risk of the employee exiting the company.
+        constraints:
+          - type: not_null
+
+
+  - name: stg_job_positions
+    description: >
+      Staging model that extracts and deduplicates job-related information from employee snapshots.
+      It creates a unique job position identifier and includes metadata such as job title,
+      department, and business unit.
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: job_possition_id
+        data_type: VARCHAR
+        description: >
+          Surrogate key representing a unique job position based on the job title.
+        constraints:
+          - type: not_null
+          - type: unique
+
+      - name: job_title
+        data_type: VARCHAR
+        description: >
+          Title of the job held by the employee (e.g., Software Engineer, HR Manager).
+        constraints:
+          - type: not_null
+
+      - name: department
+        data_type: VARCHAR
+        description: >
+          The department within the organization where the job position is located.
+        constraints:
+          - type: not_null
+
+      - name: business_unit
+        data_type: VARCHAR
+        description: >
+          The business unit associated with the job position.
+        constraints:
+          - type: not_null

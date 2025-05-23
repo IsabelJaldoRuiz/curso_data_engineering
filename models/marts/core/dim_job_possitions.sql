@@ -8,7 +8,7 @@ dim_job_possitions AS (
         job_possition_id
         , job_title
         , department
-        , businness_unit
+        , business_unit
     FROM stg_job_possitions
     )
 

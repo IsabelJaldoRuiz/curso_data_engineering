@@ -1,3 +1,10 @@
+{{
+    config(
+        materialized = "incremental",
+        unique_key = "created_at_date"
+    )
+}}
+
 WITH stg_orders AS (
     SELECT * 
     FROM  {{ ref('stg_sql_server_dbo__orders') }}
@@ -26,3 +33,7 @@ fct_orders AS (
     )
 
 SELECT * FROM fct_orders
+
+{% if is_incremental() %}
+	  WHERE date_load > (SELECT MAX(date_load) FROM {{ this }} )
+{% endif %}

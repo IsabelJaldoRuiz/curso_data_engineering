@@ -1,7 +1,16 @@
+{{ 
+    config(
+        materialized='incremental',
+        unique_key = 'snapshot_id',
+        on_schema_change='fail'
+    ) 
+}}
+
 WITH src_employees_snapshots AS (
     SELECT * 
         , CAST( {{ dbt_utils.generate_surrogate_key(['EMPLOYEE_ID', 'FIRST_NAME', 'LAST_NAME']) }} AS VARCHAR ) AS generate_employee_id
     FROM {{ source('human_resources', 'employees_snapshots') }}
+
     ),
 
 renamed_casted AS (
@@ -17,7 +26,7 @@ renamed_casted AS (
         -- , CAST( {{ dbt_utils.generate_surrogate_key(['JOB_TITLE']) }} AS VARCHAR ) AS job_possition_id
         , CAST( JOB_TITLE AS VARCHAR ) AS job_title
         , CAST( DEPARTMENT AS VARCHAR ) AS department
-        , CAST( BUSINESS_UNIT AS VARCHAR ) AS businness_unit
+        , CAST( BUSINESS_UNIT AS VARCHAR ) AS business_unit
         , CAST( JOB_LEVEL AS NUMBER ) AS job_level
         -- , CAST( 
         --     CASE CHARINDEX(',', LOCATION)
@@ -60,3 +69,6 @@ renamed_casted AS (
     )
 
 SELECT * FROM renamed_casted
+{% if is_incremental() %}
+	  WHERE shapshot_date > (SELECT MAX(shapshot_date) FROM {{ this }} )
+{% endif %}

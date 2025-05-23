@@ -1,9 +1,3 @@
-{{
-  config(
-    materialized='view'
-  )
-}}
-
 WITH bases_addresses_addresses_info AS (
     SELECT addresess.* 
         , latitude
